@@ -28,10 +28,14 @@ module Tree (BinaryTree(Nil, Node), Set, empty, isEmpty, insert, member) where
 
         insert x Nil = Node Nil x Nil
         insert x (Node a y b)
-            | x < y = Node (insert x a) y b
-            | x > y = Node a y (insert x b)
-            | otherwise = throw $ DuplicateElement "Set.insert"
-            
+            | cand == Nil = goLeftAndAppend x (Node a y b)
+            | val == x = throw $ DuplicateElement "Set.insert"
+            | otherwise = goLeftAndAppend x b
+            where
+                cand = getNodeCandidate x ys Nil
+                Node _ val _ = cand
+                goLeftAndAppend x Nil = insert x Nil
+                goLeftAndAppend x (Node a y b) = goLeftAndAppend x a
         
         member _ Nil = False
         member x ys = not (isEmpty cand) && (val == x) 
