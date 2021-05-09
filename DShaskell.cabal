@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 398fea10ddacb5f2b900cce661007c78dd2fa576e3279e276d657a09bdbb2a03
+-- hash: a1a268a99765d0fce36b79be1a6cfaa58a2b1a764ce8a1363d9b0a5848bf3104
 
 name:           DShaskell
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , criterion
   default-language: Haskell2010
 
 executable DShaskell-exe
@@ -39,6 +40,7 @@ executable DShaskell-exe
   other-modules:
       DSException
       Sequence
+      Set
       Tree
       Paths_DShaskell
   hs-source-dirs:
@@ -47,6 +49,7 @@ executable DShaskell-exe
   build-depends:
       DShaskell
     , base >=4.7 && <5
+    , criterion
   default-language: Haskell2010
 
 test-suite DShaskell-test
@@ -60,4 +63,5 @@ test-suite DShaskell-test
   build-depends:
       DShaskell
     , base >=4.7 && <5
+    , criterion
   default-language: Haskell2010

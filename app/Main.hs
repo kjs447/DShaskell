@@ -1,7 +1,8 @@
 module Main where
     import Tree
+    import Criterion.Main
     
-    main = print $ member 9 Nil
+    main = print $ complete 3 12
     
     
     

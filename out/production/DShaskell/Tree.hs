@@ -1,40 +1,60 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
-module Tree (BinaryTree(Nil, Node), Set, empty, isEmpty, insert, member) where
+module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete) where
     import DSException (DuplicateElement(DuplicateElement), throw)
+    import qualified Set as S
     
     data BinaryTree a
         = Nil | Node (BinaryTree a) a (BinaryTree a)
-        deriving Show
+        deriving (Show, Eq)
+
+    empty :: BinaryTree a
+    empty = Nil
+
+    isEmpty :: BinaryTree a -> Bool
+    isEmpty x = case x of
+      empty -> True
+      _ -> False
         
     getNodeCandidate :: Ord a => a -> BinaryTree a -> BinaryTree a -> BinaryTree a
     getNodeCandidate _ Nil key = key
     getNodeCandidate x node@(Node a y b) key = if x < y
       then getNodeCandidate x a key
       else getNodeCandidate x b node
-        
-    class Ord a => Set set a where
-        empty :: set a
-        isEmpty :: set a -> Bool
-        isEmpty xs = case xs of
-          empty -> True
-          _ -> False
-        
-        insert :: a -> set a -> set a
-        member :: a -> set a -> Bool
+      
+    complete :: a -> Integer -> BinaryTree a
+    complete x n
+        | n == 0 = Nil
+        | odd n = Node sharedNode x sharedNode
+        | otherwise = Node (insertLastOne sharedNode (n `div` 2)) x sharedNode
+            where 
+                sharedNode = complete x ((n - 1) `div` 2)
+                insertLastOne Nil _ = Node Nil x Nil
+                insertLastOne tree indicator
+                    | indicator == 1 = Node Nil x Nil
+                    | indicator == 2 = Node (Node Nil x Nil) x r
+                    | indicator == 3 = Node l x (Node Nil x Nil)
+                    | even indicator = Node (insertLastOne tree (indicator `div` 2)) x r
+                    | otherwise = Node l x (insertLastOne tree (indicator `div` 2))
+                        where Node l x r = tree
 
-    instance (Ord a) => Set BinaryTree a where
-        empty = Nil
+    instance (Ord a) => S.Set BinaryTree a where
+        empty = empty
+        isEmpty = isEmpty
 
         insert x Nil = Node Nil x Nil
-        insert x (Node a y b)
-            | x < y = Node (insert x a) y b
-            | x > y = Node a y (insert x b)
+        insert x ys@(Node a y b)
+            | isEmpty cand = goLeftAndAppend x (Node a y b)
+            | val /= x = goLeftAndAppend x b
             | otherwise = throw $ DuplicateElement "Set.insert"
-            
-        
+            where
+                cand = getNodeCandidate x ys Nil
+                Node _ val _ = cand
+                goLeftAndAppend x Nil = S.insert x Nil
+                goLeftAndAppend x (Node a y b) = goLeftAndAppend x a
+
         member _ Nil = False
-        member x ys = not (isEmpty cand) && (val == x) 
+        member x ys = not (isEmpty cand) && (val == x)
             where
                 cand = getNodeCandidate x ys Nil
                 Node _ val _ = cand
