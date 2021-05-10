@@ -34,8 +34,8 @@ module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete
                     | indicator == 1 = Node Nil x Nil
                     | indicator == 2 = Node (Node Nil x Nil) x r
                     | indicator == 3 = Node l x (Node Nil x Nil)
-                    | even indicator = Node (insertLastOne tree (indicator `div` 2)) x r
-                    | otherwise = Node l x (insertLastOne tree (indicator `div` 2))
+                    | even indicator = Node (insertLastOne l (indicator `div` 2)) x r
+                    | otherwise = Node l x (insertLastOne r (indicator `div` 2))
                         where Node l x r = tree
 
     instance (Ord a) => S.Set BinaryTree a where
