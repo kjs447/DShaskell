@@ -1,7 +1,7 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts, RankNTypes #-}
 
 module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete) where
-    import DSException (DuplicateElement(DuplicateElement), throw)
+    import DSException (DuplicateElement(DuplicateElement), NotFound(NotFound), throw)
     import qualified Set as S
     import qualified FiniteMap as FM
     
@@ -59,5 +59,30 @@ module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete
             where
                 cand = getNodeCandidate x ys Nil
                 Node _ val _ = cand
+                
+    newtype TupleWithKey a b = TupleWithKey { getTuple :: (a, b) }
+    instance (Eq a) => Eq (TupleWithKey a b) where
+        TupleWithKey (x, _) == TupleWithKey (y, _) = x == y
+    instance (Ord a) => Ord (TupleWithKey a b) where
+        compare (TupleWithKey (x, _)) (TupleWithKey (y, _)) = compare x y
+                
+    newtype BinaryTreeWithKey key a = BinaryTreeWithKey { getTree :: BinaryTree (key, a) }
+    instance (Ord key) => FM.FiniteMap BinaryTreeWithKey key a where
+        empty = BinaryTreeWithKey Nil
 
+        bind k v (BinaryTreeWithKey Nil) = BinaryTreeWithKey $ Node Nil (k, v) Nil
+        bind k v (BinaryTreeWithKey m@(Node a y b)) = BinaryTreeWithKey $ case cmp of
+            LT -> Node (getTree (FM.bind k v $ BinaryTreeWithKey a)) y b
+            EQ -> Node a (k, v) b
+            GT -> Node a y $ getTree (FM.bind k v $ BinaryTreeWithKey b)
+            where cmp = compare k (fst y)
+
+        lookup k m
+            | isEmpty (getTree m) || isEmpty cand || k' /= k
+                = throw $ NotFound "FiniteMap.lookup"
+            | otherwise = v
+            where
+                Node _ y _ = getTree m
+                cand = getNodeCandidate (k, snd y) (getTree m) Nil
+                Node _ (k', v) _ = cand
      
