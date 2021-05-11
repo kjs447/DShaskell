@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a1a268a99765d0fce36b79be1a6cfaa58a2b1a764ce8a1363d9b0a5848bf3104
+-- hash: c06cf13e2ac54d990399604cd090024f6e9df937fb4bb88d5d224a47e6ca2b27
 
 name:           DShaskell
 version:        0.1.0.0
@@ -39,6 +39,7 @@ executable DShaskell-exe
   main-is: Main.hs
   other-modules:
       DSException
+      FiniteMap
       Sequence
       Set
       Tree
