@@ -1,8 +1,9 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 
 module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete) where
     import DSException (DuplicateElement(DuplicateElement), throw)
     import qualified Set as S
+    import qualified FiniteMap as FM
     
     data BinaryTree a
         = Nil | Node (BinaryTree a) a (BinaryTree a)
@@ -51,15 +52,12 @@ module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete
                 cand = getNodeCandidate x ys Nil
                 Node _ val _ = cand
                 goLeftAndAppend x Nil = S.insert x Nil
-                goLeftAndAppend x (Node a y b) = goLeftAndAppend x a
+                goLeftAndAppend x (Node a y b) = Node (goLeftAndAppend x a) y b
 
         member _ Nil = False
         member x ys = not (isEmpty cand) && (val == x)
             where
                 cand = getNodeCandidate x ys Nil
                 Node _ val _ = cand
-                
-        
-                
-    
+
      
