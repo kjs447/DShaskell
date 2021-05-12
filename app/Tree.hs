@@ -60,29 +60,29 @@ module Tree (BinaryTree(Nil, Node), empty, isEmpty, S.insert, S.member, complete
                 cand = getNodeCandidate x ys Nil
                 Node _ val _ = cand
                 
-    newtype TupleWithKey a b = TupleWithKey { getTuple :: (a, b) }
-    instance (Eq a) => Eq (TupleWithKey a b) where
+    newtype TupleWithKey key a = TupleWithKey { getTuple :: (key, a) }
+    instance (Eq key) => Eq (TupleWithKey key a) where
         TupleWithKey (x, _) == TupleWithKey (y, _) = x == y
-    instance (Ord a) => Ord (TupleWithKey a b) where
+    instance (Ord key) => Ord (TupleWithKey key a) where
         compare (TupleWithKey (x, _)) (TupleWithKey (y, _)) = compare x y
                 
-    newtype BinaryTreeWithKey key a = BinaryTreeWithKey { getTree :: BinaryTree (key, a) }
+    newtype BinaryTreeWithKey key a = BinaryTreeWithKey { getTree :: BinaryTree (TupleWithKey key a) }
     instance (Ord key) => FM.FiniteMap BinaryTreeWithKey key a where
         empty = BinaryTreeWithKey Nil
 
-        bind k v (BinaryTreeWithKey Nil) = BinaryTreeWithKey $ Node Nil (k, v) Nil
+        bind k v (BinaryTreeWithKey Nil) = BinaryTreeWithKey $ Node Nil (TupleWithKey (k, v)) Nil
         bind k v (BinaryTreeWithKey m@(Node a y b)) = BinaryTreeWithKey $ case cmp of
             LT -> Node (getTree (FM.bind k v $ BinaryTreeWithKey a)) y b
-            EQ -> Node a (k, v) b
+            EQ -> Node a (TupleWithKey (k, v)) b
             GT -> Node a y $ getTree (FM.bind k v $ BinaryTreeWithKey b)
-            where cmp = compare k (fst y)
+            where cmp = compare k (fst $ getTuple y)
 
         lookup k m
             | isEmpty (getTree m) || isEmpty cand || k' /= k
                 = throw $ NotFound "FiniteMap.lookup"
             | otherwise = v
             where
-                Node _ y _ = getTree m
-                cand = getNodeCandidate (k, snd y) (getTree m) Nil
-                Node _ (k', v) _ = cand
+                Node _ (TupleWithKey (_, y)) _ = getTree m
+                cand = getNodeCandidate (TupleWithKey (k, y)) (getTree m) Nil
+                Node _ (TupleWithKey (k', v)) _ = cand
      
