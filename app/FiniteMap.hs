@@ -6,3 +6,4 @@ module FiniteMap where
         bind :: key -> a -> map key a -> map key a
         lookup :: key -> map key a -> a
         
+        
