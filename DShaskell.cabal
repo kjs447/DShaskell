@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c06cf13e2ac54d990399604cd090024f6e9df937fb4bb88d5d224a47e6ca2b27
+-- hash: fb162b5134f11afd497c61d06881c5b871cba1b85dcf7bbeb81678b5af56388a
 
 name:           DShaskell
 version:        0.1.0.0
@@ -26,6 +26,13 @@ source-repository head
   location: https://github.com/Github username here/DShaskell
 
 library
+  exposed-modules:
+      DSException
+      FiniteMap
+      Heap
+      Sequence
+      Set
+      Tree
   other-modules:
       Paths_DShaskell
   hs-source-dirs:
@@ -38,11 +45,6 @@ library
 executable DShaskell-exe
   main-is: Main.hs
   other-modules:
-      DSException
-      FiniteMap
-      Sequence
-      Set
-      Tree
       Paths_DShaskell
   hs-source-dirs:
       app

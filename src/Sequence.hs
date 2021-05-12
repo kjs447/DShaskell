@@ -19,7 +19,7 @@ module Sequence (Sequence, empty, isEmpty, cons, Sequence.head, Sequence.tail,
         (++) :: seq a -> seq a -> seq a
         xs ++ ys = if isEmpty xs then ys else cons (Sequence.head xs) (Sequence.tail xs Sequence.++ ys)
         
-        update :: seq a -> Int -> a -> seq a
+        update :: Integral n => seq a -> n -> a -> seq a
         update xs _ _ | isEmpty xs = throw $ IndexOutOfBounds ""
         update xs 0 y = cons y $ Sequence.tail xs
         update xs i y = cons (Sequence.head xs) 

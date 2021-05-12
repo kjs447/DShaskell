@@ -1,12 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts, RankNTypes #-}
 
-module Tree (BinaryTree(Nil, Node), getLeft, getRight, getValue, empty, isEmpty, S.insert, S.member, complete
-    , TupleWithKey(TupleWithKey, getTuple), BinaryTreeWithKey(BinaryTreeWithKey, getTree), FM.bind, FM.lookup,
-    getNodeCandidate) where
-    import DSException (DuplicateElement(DuplicateElement), throw)
-    import qualified Set as S
-    import qualified FiniteMap as FM
-    
+module Tree where
+    import DSException
     data BinaryTree a
         = Nil | Node (BinaryTree a) a (BinaryTree a)
         deriving Show
@@ -16,9 +11,17 @@ module Tree (BinaryTree(Nil, Node), getLeft, getRight, getValue, empty, isEmpty,
         (Node l v r) == (Node l' v' r') = v == v' && l == l' && r == r'
         _ == _ = False
 
-    getLeft (Node l x r) = l
-    getRight (Node l x r) = r
-    getValue (Node l x r) = x
+    getLeft :: BinaryTree a -> BinaryTree a
+    getLeft Nil = throw $ Empty "BinaryTree.getLeft"
+    getLeft (Node l _ _) = l
+
+    getRight :: BinaryTree a -> BinaryTree a
+    getRight Nil = throw $ Empty "BinaryTree.getRight"
+    getRight (Node _ _ r) = r
+
+    getValue :: BinaryTree a -> a
+    getValue Nil = throw $ Empty "BinaryTree.getValue"
+    getValue (Node _ x _) = x
 
     empty :: BinaryTree a
     empty = Nil
@@ -48,27 +51,6 @@ module Tree (BinaryTree(Nil, Node), getLeft, getRight, getValue, empty, isEmpty,
                     | even indicator = Node (insertLastOne l (indicator `div` 2)) x r
                     | otherwise = Node l x (insertLastOne r (indicator `div` 2))
                         where Node l x r = tree
-
-    instance (Ord a) => S.Set BinaryTree a where
-        empty = empty
-        isEmpty = isEmpty
-
-        insert x Nil = Node Nil x Nil
-        insert x ys@(Node a y b)
-            | isEmpty cand = goLeftAndAppend x (Node a y b)
-            | val /= x = goLeftAndAppend x b
-            | otherwise = throw $ DuplicateElement "Set.insert"
-            where
-                cand = getNodeCandidate x ys Nil
-                Node _ val _ = cand
-                goLeftAndAppend x Nil = S.insert x Nil
-                goLeftAndAppend x (Node a y b) = Node (goLeftAndAppend x a) y b
-
-        member _ Nil = False
-        member x ys = not (isEmpty cand) && (val == x)
-            where
-                cand = getNodeCandidate x ys Nil
-                Node _ val _ = cand
                 
     newtype TupleWithKey key a = TupleWithKey { getTuple :: (key, a) }
     instance (Show key, Show a) => Show (TupleWithKey key a) where
@@ -82,25 +64,5 @@ module Tree (BinaryTree(Nil, Node), getLeft, getRight, getValue, empty, isEmpty,
     instance (Show key, Show a) => Show (BinaryTreeWithKey key a) where
         show = show . getTree
     instance Eq key => Eq (BinaryTreeWithKey key a) where
-        x == y = (getTree x) == (getTree y)
-
-    instance (Ord key) => FM.FiniteMap BinaryTreeWithKey key a where
-        empty = BinaryTreeWithKey Nil
-
-        bind k v (BinaryTreeWithKey Nil) = BinaryTreeWithKey $ Node Nil (TupleWithKey (k, v)) Nil
-        bind k v (BinaryTreeWithKey m@(Node a y b)) = BinaryTreeWithKey $ case cmp of
-            LT -> Node (getTree (FM.bind k v $ BinaryTreeWithKey a)) y b
-            EQ -> Node a (TupleWithKey (k, v)) b
-            GT -> Node a y $ getTree (FM.bind k v $ BinaryTreeWithKey b)
-            where cmp = compare k (fst $ getTuple y)
-
-
-        lookup k m
-            | isEmpty (getTree m) || isEmpty cand || k' /= k
-                = Nothing
-            | otherwise = Just v
-            where
-                Node _ (TupleWithKey (_, y)) _ = getTree m
-                cand = getNodeCandidate (TupleWithKey (k, y)) (getTree m) Nil
-                Node _ (TupleWithKey (k', v)) _ = cand
+        x == y = getTree x == getTree y
      

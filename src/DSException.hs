@@ -1,7 +1,4 @@
-module DSException (Empty(Empty)
-    , DuplicateElement(DuplicateElement)
-    , NotFound(NotFound)
-    , module Control.Exception) where
+module DSException (module DSException, module Control.Exception) where
     import Control.Exception (throw, Exception)
       
     -- Define Empty Exception

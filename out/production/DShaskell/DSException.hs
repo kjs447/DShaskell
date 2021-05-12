@@ -18,3 +18,4 @@ module DSException (Empty(Empty)
     newtype NotFound = NotFound String
     instance Show NotFound where
         show (NotFound func) = "*** " ++ func ++ ": cannot find"
+    instance Exception NotFound
